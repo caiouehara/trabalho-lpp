@@ -1,0 +1,156 @@
+ derivada(X, X, 1) :- atomic(X).
+derivada(C * X, C) :- atomic(C).
+derivada(X ^ N, N * (X ^ N1)) :- atomic(X), atomic(N), N1 is N - 1.
+ 
+ % Regras da soma
+derivada(U + V, DU + DV) :- derivada(U, DU), derivada(V, DV).
+derivada(U - V, DU - DV) :- derivada(U, DU), derivada(V, DV).
+
+    % Regras da multiplicação e da divisão
+derivada(U*V, DU*V+U*DV):- derivada(U, DU), derivada(V, DV).
+derivada(U/V,(DU*V+U*DV)/V^2):- derivada(U, DU), derivada(V, DV).
+
+    % Regras da exponeciação e logarítimicas
+derivada(C * U, C * DU) :- atomic(C), derivada(U, DU).
+derivada(exp(V),exp(V)*DV):- derivada(V,DV).
+derivada(ln(V),DV/V):- derivada(V,DV).
+%derivada(A^V,X,(A^V)*ln(A)*DV):- integer(A), atomic(A), A\==X, derivada(V,X,DV). 
+
+    % Regras trigonométricas
+derivada(sin(X), cos(X)).
+derivada(cos(X), -sin(X)).
+derivada(tan(X), 1 / (cos(X) ^ 2)).
+derivada(sec(X), sec(X) * tan(X)).
+derivada(csc(X), -csc(X) * cot(X)).
+derivada(cot(X), -1 / (sin(X) ^ 2)).
+
+    % Regras trigonométricas inversas
+derivada(arcsen(V), (1-V^2)^(-1/2)*DV):- derivada(V, DV).
+derivada(arccos(V), -(1-V^2)^(-1/2)*DV):- derivada(V, DV).
+derivada(arctg(V), (1+V^2)^(-1)*DV):- derivada(V, DV).
+derivada(arccotg(V), -(1+V^2)^(-1)*DV):- derivada(V, DV).
+derivada(arcsec(V), (V^2-1)^(-1/2)*DV):- derivada(V, DV).
+derivada(arccsc(V), -(V^2-1)^(-1/2)*DV):- derivada(V, DV).
+
+    % Regras hiperbólicas
+derivada(senh(W), Z*cosh(W)):- derivada(W, Z).
+derivada(cosh(W), -Z*senh(W)):- derivada(W, Z).
+derivada(tgh(W), Z*sech(W)^2):- derivada(W, Z).
+derivada(cotgh(W), -Z*csch(W)^2):- derivada(W, Z).
+derivada(sech(W), Z*sech(W)*tgh(W)):- derivada(W, Z).
+derivada(csch(W), -Z*csch(W)*cotgh(W)):- derivada(W, Z).
+
+    % Regras hiperbólicas inversas
+derivada(arcsenh(V), DV/(V^2+1)^(1/2)):- derivada(V, DV).
+derivada(arccosh(V), DV/(V^2-1)^(1/2)):- derivada(V, DV).
+derivada(arctgh(V), DV/(1-V^2)):- derivada(V, DV).
+derivada(arccotgh(V), DV/(1+V^2)):- derivada(V, DV).
+derivada(arcsech(V), -DV/((DV)*(-V^2+1)^(1/2))):- derivada(V, DV).
+derivada(arccsch(V), -DV/((DV)*(V^2+1)^(1/2))):- derivada(V, DV).
+
+    % Regras polinômiais
+%derivada(U^N,X,N*U^(N-1)*DU):- integer(N), atomic(N), N\==X, derivada(U,DU). 
+derivada(-V,-DV):- derivada(V,DV).
+
+% Regras para cálculo da integral
+integral(X, X) :- atomic(X).
+integral(C * X, (C/2) * (X ^ 2)) :- atomic(C), atomic(X).
+integral(X ^ N, (1 / (N + 1)) * (X ^ (N + 1))) :- atomic(X), atomic(N), N \= -1.
+integral(U + V, IU + IV) :- integral(U, IU), integral(V, IV).
+integral(U - V, IU - IV) :- integral(U, IU), integral(V, IV).
+integral(C * U, C * IU) :- atomic(C), integral(U, IU).
+integral(sin(X), -cos(X)).
+integral(cos(X), sin(X)).
+integral(tan(X), -log(cos(X))).
+integral(sec(X), log(sec(X) + tan(X))).
+integral(csc(X), -log(csc(X) + cot(X))).
+integral(cot(X), log(sin(X))).
+
+
+/* FUNÇÕES PARA RESOLUÇÃO DE EXP BIN */
+simplifica(X, X).
+simplifica(X+Y, R):- R is X+Y.
+
+
+simplifica(X+0,X).
+
+simplifica(1*X,X).
+simplifica(X^1,X).
+simplifica(X^0,X/X).
+
+
+/* FUNÇÕES PARA SIMPLIFICAÇÃO */
+simplifica(X^A*X^B,X^C):- C is A+B.
+simplifica(X^A/X^B,X^C):- C is A-B.
+simplifica(X*(A+B),X*C):- C is A+B.
+simplifica(X*(A-B),X*C):- C is A-B.
+
+
+/* FUNÇÕES PARA DERIVADA */
+/* regras fundamentais*/
+deriva(X,X,1).
+deriva(A*X,X, A).
+deriva(C,X,0):- atomic(C), C\==X.
+
+
+/* regras da soma */
+deriva(U+V,X, DU+DV):- 
+    deriva(U,X, DU), 
+    deriva(V,X,DV).
+
+deriva(U-V,X,DU-DV):- 
+    deriva(U,X,DU), 
+    deriva(V,X,DV).
+
+/* regras da multiplicação e do quociente*/
+deriva(U*V,X,DU*V+U*DV):- 
+    deriva(U,X,DU), 
+    deriva(V,X,DV).
+
+deriva(U/V,X,(DU*V+U*DV)/V^2):- 
+    deriva(U,X,DU), 
+    deriva(V,X,DV).
+
+/* regras da exponencial e logarítmica */
+deriva(exp(V),X,exp(V)*DV):- deriva(V,X,DV).
+deriva(ln(V),X,DV/V):- deriva(V,X,DV).
+deriva(A^V,X,(A^V)*ln(A)*DV):-
+	integer(A), atomic(A), A\==X,
+	deriva(V,X,DV).    
+
+/* regra do polinômio */
+deriva(U^N,X,N*U^(N-1)*DU):-
+	integer(N), atomic(N), N\==X,
+	deriva(U,X,DU).
+deriva(-V,X,-DV):- deriva(V,X,DV).
+
+
+/* regras das trigonométricas */
+deriva(sen(W),X,Z*cos(W)):- deriva(W,X,Z).
+deriva(cos(W),X,-Z*sen(W)):- deriva(W,X,Z).
+deriva(tg(W),X,Z*sec(W)^2):- deriva(W,X,Z).
+deriva(cotg(W),X,-Z*csc(W)^2):- deriva(W,X,Z).
+deriva(sec(W),X,Z*sec(W)*tg(W)):- deriva(W,X,Z).
+deriva(csc(W),X,-Z*csc(W)*cotg(W)):- deriva(W,X,Z).
+
+deriva(arcsen(V),X,(1-V^2)^(-1/2)*DV):- deriva(V,X,DV).
+deriva(arccos(V),X,-(1-V^2)^(-1/2)*DV):- deriva(V,X,DV).
+deriva(arctg(V),X,(1+V^2)^(-1)*DV):- deriva(V,X,DV).
+deriva(arccotg(V),X,-(1+V^2)^(-1)*DV):- deriva(V,X,DV).
+deriva(arcsec(V),X,(V^2-1)^(-1/2)*DV):- deriva(V,X,DV).
+deriva(arccsc(V),X,-(V^2-1)^(-1/2)*DV):- deriva(V,X,DV).
+
+/* regras das hiperbólicas */
+deriva(senh(W),X,Z*cosh(W)):- deriva(W,X,Z).
+deriva(cosh(W),X,-Z*senh(W)):- deriva(W,X,Z).
+deriva(tgh(W),X,Z*sech(W)^2):- deriva(W,X,Z).
+deriva(cotgh(W),X,-Z*csch(W)^2):- deriva(W,X,Z).
+deriva(sech(W),X,Z*sech(W)*tgh(W)):- deriva(W,X,Z).
+deriva(csch(W),X,-Z*csch(W)*cotgh(W)):- deriva(W,X,Z).
+
+deriva(arcsenh(V),X,DV/(V^2+1)^(1/2)):- deriva(V,X,DV).
+deriva(arccosh(V),X,DV/(V^2-1)^(1/2)):- deriva(V,X,DV).
+deriva(arctgh(V),X,DV/(1-V^2)):- deriva(V,X,DV).
+deriva(arccotgh(V),X,DV/(1+V^2)):- deriva(V,X,DV).
+deriva(arcsech(V),X,-DV/((DV)*(-V^2+1)^(1/2))):- deriva(V,X,DV).
+deriva(arccsch(V),X,-DV/((DV)*(V^2+1)^(1/2))):- deriva(V,X,DV).
