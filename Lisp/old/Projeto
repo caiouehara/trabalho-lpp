@@ -1,0 +1,41 @@
+(defun derivada (expr var)
+  (cond ((numberp expr) 0) ; Derivada de uma constante é zero
+
+        ((equal expr var) 1) ; Derivada da variável em relação a si mesma é 1
+
+        ((atom expr) 0) ; Derivada de qualquer outra expressão atômica é zero
+
+        ((eq (car expr) '+) ; Derivada da soma
+        (cons '+ (mapcar #'(lambda (term) (derivada term var)) (cdr expr))))
+
+        ((eq (car expr) '-) ; Derivada da subtração
+        (cons '- (mapcar #'(lambda (term) (derivada term var)) (cdr expr))))
+
+        ((eq (car expr) '*) ; Derivada do produto
+        (let ((f (car (cdr expr))) ; f(x)
+               (g (car (cdr (cdr expr))))) ; g(x)
+           (cons '+ (list (cons '* (list (derivada f var) g)) ; f'(x) * g(x)
+                          (cons '* (list f (derivada g var))))))) ; f(x) * g'(x)
+
+        ((eq (car expr) '/) ; Derivada da divisão
+        (let ((f (car (cdr expr))) ; f(x)
+               (g (car (cdr (cdr expr))))) ; g(x)
+           (cons '/ (list (cons '- (list (cons '* (list (derivada f var) g)) ; f'(x) * g(x)
+                                          (cons '* (list f (derivada g var)))) ; f(x) * g'(x)
+                              (cons '^ (list g 2))))))) ; g(x)^2
+
+        ((eq (car expr) '^) ; Derivada da potência
+         (let ((f (car (cdr expr))) ; f(x)
+               (g (car (cdr (cdr expr))))) ; g(x)
+           (cons '* (list (cons '* (list (cons '^ (list f (cons '- g 1))) ; f(x)^(g-1)
+                                          (derivada f var))) ; f'(x)
+                          (cons '+ (list (cons '* (list (cons '^ (list f g)) ; f(x)^g
+                                                         (derivada g var))) ; g'(x)
+                                         (cons '* (list (cons '* (list g (cons '^ (list f (cons '- g 1))))) ; g * f(x)^(g-1)
+                                                         (derivada f var)))))))))
+
+           (t 0); Expressão desconhecida, retorna zero
+    )
+) 
+
+(derivada '(x) x)

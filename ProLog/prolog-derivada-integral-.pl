@@ -75,6 +75,3 @@ d(U/V,(DU*V+U*DV)/V^2):- d(U, DU), d(V, DV).
     % Regras da soma
 d(U + V, DU + DV) :- d(U, DU), d(V, DV).
 d(U - V, DU - DV) :- d(U, DU), d(V, DV).
-
-% Regra para a regra da cadeia
-d(U * V, DU * V + U * DV) :- d(U, DU), d(V, DV).
